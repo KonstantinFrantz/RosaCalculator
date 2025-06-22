@@ -11,6 +11,7 @@ Calculator::Calculator(QObject *parent) : QObject(parent) {}
 QString Calculator::expression() const { return m_expression; }
 QString Calculator::previewResult() const { return m_previewResult; }
 bool Calculator::hasError() const { return m_hasError; }
+bool Calculator::angleDegrees() const { return m_angleDegrees; }
 QString Calculator::errorMessage() const { return m_errorMessage; }
 
 void Calculator::setCurrentNumber(const QString &d) {
@@ -144,7 +145,7 @@ void Calculator::evaluatePreview()
 
     bool ok = false;
     const double res = Parser::evaluate(prep,&ok);
-    if (const QString s = QString::number(res,'g',17); ok && s != "nan") {
+    if (const QString s = formatResult(res); ok && s != "nan") {
         if (s != m_previewResult) {
             m_previewResult = s; emit previewResultChanged();
         }
@@ -160,7 +161,7 @@ void Calculator::evaluateResult()
     bool ok = false;
     const double res = Parser::evaluate(prep,&ok);
 
-    if (const QString s = QString::number(res,'g',17); ok && s != "nan") {
+    if (const QString s = formatResult(res); ok && s != "nan" && s != "inf") {
         setCurrentNumber(s); setExpression(s); m_lastWasResult = true;
         if (!m_previewResult.isEmpty()) {
             m_previewResult = ""; emit previewResultChanged();
@@ -169,6 +170,13 @@ void Calculator::evaluateResult()
     } else {
         m_hasError = true; m_errorMessage = "Недопустимое выражение"; emit errorChanged();
     }
+}
+
+QString Calculator::formatResult(const double res) {
+    if (qAbs(res - qRound64(res)) < 1e-12)
+        return QString::number(qRound64(res));
+
+    return QString::number(res, 'g', 17);
 }
 
 void Calculator::addDecimalPoint() { appendDot(); }
@@ -254,5 +262,13 @@ void Calculator::loadExpression(const QString &expr)
     setExpression(expr);
     setCurrentNumber("");
     m_lastWasResult = false;
+    evaluatePreview();
+}
+
+void Calculator::toggleAngleMode()
+{
+    m_angleDegrees = !m_angleDegrees;
+    Parser::setAngleMode(m_angleDegrees);
+    emit angleModeChanged();
     evaluatePreview();
 }

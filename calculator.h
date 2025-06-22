@@ -11,6 +11,7 @@ class Calculator : public QObject
     Q_PROPERTY(QString previewResult READ previewResult NOTIFY previewResultChanged)
     Q_PROPERTY(bool hasError READ hasError NOTIFY errorChanged)
     Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY errorChanged)
+    Q_PROPERTY(bool angleDegrees READ angleDegrees NOTIFY angleModeChanged)
 
 public:
     explicit Calculator(QObject *parent = nullptr);
@@ -18,6 +19,8 @@ public:
     [[nodiscard]] QString expression() const;
 
     [[nodiscard]] QString previewResult() const;
+
+    [[nodiscard]] bool angleDegrees() const;
 
     [[nodiscard]] bool hasError() const;
 
@@ -29,6 +32,7 @@ signals:
     void errorChanged();
     void calculationPerformed(const QString &expr,
                               const QString &result);
+    void angleModeChanged();
 
 public slots:
     void appendDigit(const QString &d);
@@ -50,12 +54,14 @@ public slots:
     Q_INVOKABLE void power();
     Q_INVOKABLE void factorial();
     Q_INVOKABLE void loadExpression(const QString &expr);
+    Q_INVOKABLE void toggleAngleMode();
 
 private:
     void setCurrentNumber(const QString &d);
     void setExpression(const QString &e);
     void clearError();
-    static QString prepareExpression(const QString &raw) ;
+    static QString prepareExpression(const QString &raw);
+    static QString formatResult(double res);
 
     QString m_currentNumber;
     QString m_expression;
@@ -64,6 +70,7 @@ private:
 
     bool m_hasError = false;
     bool m_lastWasResult = false;
+    bool m_angleDegrees = false;
     int m_openParensCount = 0;
 };
 

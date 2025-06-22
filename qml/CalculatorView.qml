@@ -138,11 +138,21 @@ Item {
             }
 
             CalcButton {
-                text: "inv"
+                text: "INV"
                 fontSize: 16
                 color: functionsGrid.inverseMode ? "#55525d" : "#3d3b47"
                 textColor: "#ffffff"
                 onClicked: functionsGrid.inverseMode = !functionsGrid.inverseMode
+                Layout.preferredWidth: functionsGrid.buttonSize
+                Layout.preferredHeight: functionsGrid.buttonSize
+            }
+
+            CalcButton {
+                text: calculator.angleDegrees ? "DEG" : "RAD"
+                fontSize: 16
+                color: "#3d3b47"
+                textColor: "#ffffff"
+                onClicked: calculator.toggleAngleMode()
                 Layout.preferredWidth: functionsGrid.buttonSize
                 Layout.preferredHeight: functionsGrid.buttonSize
             }

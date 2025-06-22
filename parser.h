@@ -34,6 +34,11 @@ public:
     static double applyOperator(const QString &op, double left, double right);
     static double applyFunction(const QString &func, double arg);
     static double factorial(double n);
+    static void setAngleMode(bool degrees);
+    static bool isDegrees();
+
+private:
+    static bool s_degrees;
 };
 
 #endif // PARSER_H

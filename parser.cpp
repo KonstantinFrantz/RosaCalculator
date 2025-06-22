@@ -318,16 +318,27 @@ double Parser::applyOperator(const QString &op, const double left, const double 
 
 double Parser::applyFunction(const QString &func, const double arg)
 {
-    if (func == "sin") return qSin(qDegreesToRadians(arg));
-    if (func == "cos") return qCos(qDegreesToRadians(arg));
-    if (func == "tan") return qTan(qDegreesToRadians(arg));
+    if (func == "sin") return qSin(isDegrees()? qDegreesToRadians(arg) : arg);
+    if (func == "cos") return qCos(isDegrees()? qDegreesToRadians(arg) : arg);
+    if (func == "tan") return qTan(isDegrees()? qDegreesToRadians(arg) : arg);
     if (func == "ln") { if (arg <= 0) throw std::runtime_error("ln(x≤0)"); return qLn(arg); }
     if (func == "log") { if (arg <= 0) throw std::runtime_error("log(x≤0)"); return log10(arg); }
     if (func == "sqrt") { if (arg < 0) throw std::runtime_error("√(x<0)"); return qSqrt(arg); }
     if (func == "abs") return qFabs(arg);
-    if (func == "arctan") return qAtan(arg);
-    if (func == "arcsin") return qAsin(arg);
-    if (func == "arccos") return qAcos(arg);
+    if (func == "arctan") {
+        const double res = qAtan(arg);
+        return isDegrees() ? qRadiansToDegrees(res) : res;
+    }
+    if (func == "arcsin") {
+        if (arg < -1 || arg > 1) throw std::runtime_error("arcsin(x<-1 || x>1)");
+        const double res = qAsin(arg);
+        return isDegrees() ? qRadiansToDegrees(res) : res;
+    }
+    if (func == "arccos") {
+        if (arg < -1 || arg > 1) throw std::runtime_error("arccos(x<-1 || x>1)");
+        const double res = qAcos(arg);
+        return isDegrees() ? qRadiansToDegrees(res) : res;
+    }
 
     throw std::invalid_argument("Неизвестная функция: " + func.toStdString());
 }
@@ -343,3 +354,7 @@ double Parser::factorial(const double n)
     for (int i = 2; i <= n; ++i) res *= i;
     return res;
 }
+
+bool Parser::s_degrees = false;
+void Parser::setAngleMode(const bool degrees) { s_degrees = degrees; }
+bool Parser::isDegrees()                { return s_degrees; }
