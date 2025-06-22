@@ -191,11 +191,29 @@ void Calculator::appendFunction(const QString &func)
     setCurrentNumber(""); evaluatePreview();
 }
 
+void Calculator::appendConstant(const QString &symbol)
+{
+    clearError();
+    if (m_lastWasResult) {
+        clear();
+        m_lastWasResult = false;
+    }
+
+    m_currentNumber.clear();
+    setExpression(m_expression + symbol);
+    evaluatePreview();
+}
+
+
 void Calculator::addParenthesis()
 {
     clearError();
     const bool close = m_openParensCount>0 && !m_expression.isEmpty() &&
-                       (m_expression.back().isDigit() || m_expression.back()==')' || m_expression.back() == '!');
+                       (m_expression.back().isDigit() ||
+                           m_expression.back()==')' ||
+                           m_expression.back() == '!' ||
+                           m_expression.back()=='e' ||
+                           m_expression.back().unicode() == 0x03C0); // π
     if (close) {
         setExpression(m_expression+')'); --m_openParensCount;
     } else {

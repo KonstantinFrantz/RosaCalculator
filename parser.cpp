@@ -64,7 +64,7 @@ QList<Parser::Token> Parser::tokenize(const QString &expression) {
                 }
 
                 bool okNum = false;
-                double numVal = number.toDouble(&okNum);
+                const double numVal = number.toDouble(&okNum);
 
                 if (!okNum)
                     throw std::invalid_argument("Неверное число: " + number.toStdString());
@@ -110,13 +110,23 @@ QList<Parser::Token> Parser::tokenize(const QString &expression) {
             ++i;
             break;
         }
+        case 0x03C0: { // π
+            tokens.append(Token{Token::Number, "π", 3.14159265358979323846, 0, false});
+            ++i;
+            continue;
+        }
+        case 'e': {
+            tokens.append(Token{Token::Number, "e", exp(1), 0, false});
+            ++i;
+            continue;
+        }
         default: {
             if (c.isDigit() || c == '.') {
                 QString number;
                 while (i < cleanExpr.length() && (cleanExpr[i].isDigit() || cleanExpr[i] == '.'))
                     number += cleanExpr[i++];
 
-                if (i < cleanExpr.length() && (cleanExpr[i] == 'e' || cleanExpr[i] == 'E')) {
+                if (i < cleanExpr.length() && (cleanExpr[i] == 'e')) {
                     number += cleanExpr[i++];
 
                     if (i < cleanExpr.length() && (cleanExpr[i] == '+' || cleanExpr[i] == '-'))

@@ -16,9 +16,9 @@ Item {
         for (let i = 0; i < str.length; ++i) {
             const ch = str[i];
 
-            const unaryMinus   = (ch === '-' && (prev === "" || prev === '(' || isOp(prev) || prev === '-'));
-            const afterExpSign = ((ch === '+' || ch === '-') && (prev === 'e' || prev === 'E'));
-            const isCaret      = (ch === '^');
+            const unaryMinus = (ch === '-' && (prev === "" || prev === '(' || isOp(prev) || prev === '-'));
+            const afterExpSign = (ch === '+' || ch === '-') && (prev === 'e') && (i >= 2 && str[i-2] >= '0' && str[i-2] <= '9');
+            const isCaret = (ch === '^');
 
             if (isOp(ch) || ch === '-') {
                 if (afterExpSign || unaryMinus || isCaret) {

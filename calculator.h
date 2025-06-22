@@ -44,6 +44,7 @@ public slots:
     Q_INVOKABLE void addDecimalPoint();
     Q_INVOKABLE void percentage();
     Q_INVOKABLE void appendFunction(const QString &func);
+    Q_INVOKABLE void appendConstant(const QString &symbol);
     Q_INVOKABLE void addParenthesis();
     Q_INVOKABLE void sqrt();
     Q_INVOKABLE void power();

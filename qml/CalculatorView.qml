@@ -66,7 +66,7 @@ Item {
             CalcButton {
                 text: "π"
                 fontSize: 20
-                onClicked: calculator.appendDigit("3.14159265359")
+                onClicked: calculator.appendConstant('π')
                 Layout.preferredWidth: functionsGrid.buttonSize
                 Layout.preferredHeight: functionsGrid.buttonSize
             }
@@ -119,6 +119,14 @@ Item {
 
                     onClicked: calculator.appendFunction(modelData)
                 }
+            }
+
+            CalcButton {
+                text: "e"
+                fontSize: 20
+                onClicked: calculator.appendConstant("e")
+                Layout.preferredWidth: functionsGrid.buttonSize
+                Layout.preferredHeight: functionsGrid.buttonSize
             }
         }
 
