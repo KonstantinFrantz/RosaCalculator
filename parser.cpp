@@ -294,7 +294,7 @@ bool Parser::isRightAssociative(const QString &op)
 bool Parser::isFunction(const QString &str)
 {
     static const QStringList functions = {
-        "sin", "cos", "tan", "ln", "log", "sqrt"
+        "sin", "cos", "tan", "ln", "log", "sqrt", "abs", "arcsin", "arccos", "arctan"
     };
     return functions.contains(str);
 }
@@ -324,6 +324,10 @@ double Parser::applyFunction(const QString &func, const double arg)
     if (func == "ln") { if (arg <= 0) throw std::runtime_error("ln(x≤0)"); return qLn(arg); }
     if (func == "log") { if (arg <= 0) throw std::runtime_error("log(x≤0)"); return log10(arg); }
     if (func == "sqrt") { if (arg < 0) throw std::runtime_error("√(x<0)"); return qSqrt(arg); }
+    if (func == "abs") return qFabs(arg);
+    if (func == "arctan") return qAtan(arg);
+    if (func == "arcsin") return qAsin(arg);
+    if (func == "arccos") return qAcos(arg);
 
     throw std::invalid_argument("Неизвестная функция: " + func.toStdString());
 }

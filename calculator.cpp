@@ -104,7 +104,7 @@ void Calculator::deleteLast()
         const long long funcStart = i + 1;
         const QString func = m_expression.mid(funcStart, len - funcStart - 1);
 
-        static const QSet<QString> funcs = { "ln", "sin", "cos", "tan", "log", "sqrt" };
+        static const QSet<QString> funcs = { "ln", "sin", "cos", "tan", "log", "sqrt", "abs", "arccos", "arcsin", "arctan" };
         if (funcs.contains(func))
             setExpression(m_expression.left(funcStart));
         else
@@ -144,8 +144,8 @@ void Calculator::evaluatePreview()
 
     bool ok = false;
     const double res = Parser::evaluate(prep,&ok);
-    if (ok) {
-        if (const QString s = QString::number(res,'g',17); s != m_previewResult) {
+    if (const QString s = QString::number(res,'g',17); ok && s != "nan") {
+        if (s != m_previewResult) {
             m_previewResult = s; emit previewResultChanged();
         }
     } else if (!m_previewResult.isEmpty()) {
@@ -160,8 +160,7 @@ void Calculator::evaluateResult()
     bool ok = false;
     const double res = Parser::evaluate(prep,&ok);
 
-    if (ok) {
-        const QString s = QString::number(res,'g',17);
+    if (const QString s = QString::number(res,'g',17); ok && s != "nan") {
         setCurrentNumber(s); setExpression(s); m_lastWasResult = true;
         if (!m_previewResult.isEmpty()) {
             m_previewResult = ""; emit previewResultChanged();

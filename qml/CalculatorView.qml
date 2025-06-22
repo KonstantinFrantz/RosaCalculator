@@ -54,6 +54,7 @@ Item {
             property int buttonSize: Math.min((root.width - 3 * 15) / 5, 80)
 
             property bool showSecondRow: false
+            property bool inverseMode: false
 
             CalcButton {
                 text: "√"
@@ -96,10 +97,17 @@ Item {
             }
 
             Repeater {
-                model: ["sin", "cos", "tan", "ln", "log"]
+                model: ["sin", "cos", "tan", "ln", "log", "abs"]
 
                 delegate: CalcButton {
-                    text: modelData
+                    readonly property string baseName: modelData
+
+                    text: {
+                        if (baseName === "sin") return functionsGrid.inverseMode ? "arcsin" : "sin"
+                        if (baseName === "cos") return functionsGrid.inverseMode ? "arccos" : "cos"
+                        if (baseName === "tan") return functionsGrid.inverseMode ? "arctan" : "tan"
+                        return baseName
+                    }
                     fontSize: 16
                     opacity: functionsGrid.showSecondRow ? 1 : 0
 
@@ -117,7 +125,7 @@ Item {
                         }
                     }
 
-                    onClicked: calculator.appendFunction(modelData)
+                    onClicked: calculator.appendFunction(text)
                 }
             }
 
@@ -125,6 +133,16 @@ Item {
                 text: "e"
                 fontSize: 20
                 onClicked: calculator.appendConstant("e")
+                Layout.preferredWidth: functionsGrid.buttonSize
+                Layout.preferredHeight: functionsGrid.buttonSize
+            }
+
+            CalcButton {
+                text: "inv"
+                fontSize: 16
+                color: functionsGrid.inverseMode ? "#55525d" : "#3d3b47"
+                textColor: "#ffffff"
+                onClicked: functionsGrid.inverseMode = !functionsGrid.inverseMode
                 Layout.preferredWidth: functionsGrid.buttonSize
                 Layout.preferredHeight: functionsGrid.buttonSize
             }
