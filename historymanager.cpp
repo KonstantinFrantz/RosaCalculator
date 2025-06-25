@@ -40,7 +40,7 @@ int HistoryManager::count() const { return m_calculations.size(); }
 
 void HistoryManager::addCalculation(const QString &expr,const QString &res)
 {
-    static const QRegularExpression opRe("[+\\-*/×÷^%costansin!sqrtlnlog]");
+    static const QRegularExpression opRe("[+\\-*/×÷^%costansin!sqrtlnlogx]");
     if(!opRe.match(expr).hasMatch()) return;
 
     CalculationEntity calculation;
@@ -66,7 +66,7 @@ void HistoryManager::clearHistory()
     }
 }
 
-void HistoryManager::removeCalculation(int index)
+void HistoryManager::removeCalculation(const int index)
 {
     if(index<0 || index>=m_calculations.size()) return;
     if(CalculationDAO::deleteById(m_calculations[index].id())){

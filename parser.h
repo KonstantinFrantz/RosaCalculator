@@ -1,7 +1,6 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include <QString>
 #include <QStack>
 #include <QStringList>
 
@@ -14,7 +13,8 @@ public:
             Operator,
             Function,
             LeftParen,
-            RightParen
+            RightParen,
+            Variable
         };
 
         Type type;
@@ -24,16 +24,16 @@ public:
         bool rightAssociative;
     };
 
-    static double evaluate(const QString &expression, bool *ok = nullptr);
     static QList<Token> tokenize(const QString &expression);
     static QList<Token> infixToPostfix(const QList<Token> &tokens);
-    static double evaluatePostfix(const QList<Token> &tokens);
     static int getOperatorPrecedence(const QString &op);
     static bool isRightAssociative(const QString &op);
     static bool isFunction(const QString &str);
-    static double applyOperator(const QString &op, double left, double right);
-    static double applyFunction(const QString &func, double arg);
-    static double factorial(double n);
+    static void setAngleMode(bool degrees);
+    static bool isDegrees();
+
+private:
+    static bool s_degrees;
 };
 
 #endif // PARSER_H

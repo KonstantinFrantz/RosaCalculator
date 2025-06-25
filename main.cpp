@@ -1,4 +1,4 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QStandardPaths>
@@ -6,13 +6,14 @@
 
 #include "calculator.h"
 #include "historymanager.h"
+#include "plotmodel.h"
 #include "database/databasemanager.h"
 
 int main(int argc, char *argv[])
 {
-    const QGuiApplication app(argc, argv);
+    const QApplication app(argc, argv);
 
-    QGuiApplication::setApplicationName("Calculator");
+    QApplication::setApplicationName("Calculator");
 
     QString dbPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir().mkpath(dbPath);
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
 
     Calculator calculator;
     HistoryManager historyManager;
+    PlotModel plotModel;
 
     QQmlApplicationEngine engine;
 
@@ -30,6 +32,7 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty("calculator", &calculator);
     engine.rootContext()->setContextProperty("historyManager", &historyManager);
+    engine.rootContext()->setContextProperty("plotModel", &plotModel);
 
     const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app,
@@ -40,5 +43,5 @@ int main(int argc, char *argv[])
 
     engine.load(url);
 
-    return QGuiApplication::exec();
+    return QApplication::exec();
 }

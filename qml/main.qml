@@ -13,6 +13,9 @@ ApplicationWindow {
 
     Component.onCompleted: {
         calculator.calculationPerformed.connect(historyManager.addCalculation)
+        calculator.plotRequested.connect(function(expr) {
+            stack.push(plotPage, { "functionExpression": expr })
+        })
     }
 
     StackView {
@@ -31,6 +34,13 @@ ApplicationWindow {
     Component {
         id: historyPage
         HistoryView {
+            onBackClicked: stack.pop()
+        }
+    }
+
+    Component {
+        id: plotPage
+        PlotView {
             onBackClicked: stack.pop()
         }
     }

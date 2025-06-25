@@ -3,26 +3,6 @@
 #include <QtMath>
 #include <QDebug>
 
-double Parser::evaluate(const QString &expression, bool *ok)
-{
-    if (expression.isEmpty()) {
-        if (ok) *ok = false;
-        return 0.0;
-    }
-
-    try {
-        const QList<Token> tokens = tokenize(expression);
-        const QList<Token> postfix = infixToPostfix(tokens);
-
-        if (ok) *ok = true;
-        return evaluatePostfix(postfix);
-    } catch (const std::exception &e) {
-        qWarning() << "Ошибка парсера:" << e.what();
-        if (ok) *ok = false;
-        return 0.0;
-    }
-}
-
 QList<Parser::Token> Parser::tokenize(const QString &expression) {
     QList<Token> tokens;
 
@@ -64,7 +44,7 @@ QList<Parser::Token> Parser::tokenize(const QString &expression) {
                 }
 
                 bool okNum = false;
-                double numVal = number.toDouble(&okNum);
+                const double numVal = number.toDouble(&okNum);
 
                 if (!okNum)
                     throw std::invalid_argument("Неверное число: " + number.toStdString());
@@ -102,7 +82,7 @@ QList<Parser::Token> Parser::tokenize(const QString &expression) {
             break;
         }
         case '!': {
-            if (i == 0 || !(cleanExpr[i-1].isDigit() || cleanExpr[i-1] == ')'))
+            if (i == 0 || (!cleanExpr[i-1].isDigit() && cleanExpr[i-1] != ')' && cleanExpr[i-1] != 'x'))
                 throw std::invalid_argument("Недостаточно операндов для факториала");
 
             Token t{Token::Operator, "!", 0.0, getOperatorPrecedence("!"), isRightAssociative("!")};
@@ -110,13 +90,23 @@ QList<Parser::Token> Parser::tokenize(const QString &expression) {
             ++i;
             break;
         }
+        case 0x03C0: { // π
+            tokens.append(Token{Token::Number, "π", 3.14159265358979323846, 0, false});
+            ++i;
+            continue;
+        }
+        case 'e': {
+            tokens.append(Token{Token::Number, "e", exp(1), 0, false});
+            ++i;
+            continue;
+        }
         default: {
             if (c.isDigit() || c == '.') {
                 QString number;
                 while (i < cleanExpr.length() && (cleanExpr[i].isDigit() || cleanExpr[i] == '.'))
                     number += cleanExpr[i++];
 
-                if (i < cleanExpr.length() && (cleanExpr[i] == 'e' || cleanExpr[i] == 'E')) {
+                if (i < cleanExpr.length() && (cleanExpr[i] == 'e')) {
                     number += cleanExpr[i++];
 
                     if (i < cleanExpr.length() && (cleanExpr[i] == '+' || cleanExpr[i] == '-'))
@@ -146,7 +136,11 @@ QList<Parser::Token> Parser::tokenize(const QString &expression) {
                 while (i < cleanExpr.length() && cleanExpr[i].isLetter())
                     func += cleanExpr[i++];
 
-                if (isFunction(func)) {
+                if (func == "x") {
+                    tokens.append(Token{Token::Variable, "x", 0.0, 0, false});
+                }
+
+                else if (isFunction(func)) {
                     if (funcStart > 0) {
                         if (QChar prev = cleanExpr[funcStart - 1]; prev.isDigit() || prev == ')' || prev == '.')
                             throw std::invalid_argument("Нужен оператор перед функцией «" + func.toStdString() + "»");
@@ -176,6 +170,10 @@ QList<Parser::Token> Parser::infixToPostfix(const QList<Token> &tokens)
         case Token::Number:
             output.append(token);
             break;
+
+        case Token::Variable:
+            output.append(token);
+        break;
 
         case Token::Function:
             operators.push(token);
@@ -219,49 +217,6 @@ QList<Parser::Token> Parser::infixToPostfix(const QList<Token> &tokens)
     return output;
 }
 
-double Parser::evaluatePostfix(const QList<Token> &tokens)
-{
-    QStack<double> stack;
-
-    for (const Token &token : tokens) {
-        switch (token.type) {
-        case Token::Number:
-            stack.push(token.numValue);
-            break;
-
-        case Token::Operator:
-            if (token.value == "!") {
-                if (stack.isEmpty())
-                    throw std::invalid_argument("Недостаточно операндов для '!'");
-
-                stack.push(factorial(stack.pop()));
-            } else {
-                if (stack.size() < 2)
-                    throw std::invalid_argument("Недостаточно операндов для оператора " + token.value.toStdString());
-
-                const double right = stack.pop();
-                const double left = stack.pop();
-                stack.push(applyOperator(token.value, left, right));
-            }
-            break;
-
-        case Token::Function:
-            if (stack.isEmpty())
-                throw std::invalid_argument("Недостаточно аргументов для функции " + token.value.toStdString());
-            stack.push(applyFunction(token.value, stack.pop()));
-            break;
-
-        default:
-            throw std::invalid_argument("Неожиданный токен в постфикс-выражении");
-        }
-    }
-
-    if (stack.size() != 1)
-        throw std::invalid_argument("Неверное выражение");
-
-    return stack.pop();
-}
-
 int Parser::getOperatorPrecedence(const QString &op)
 {
     switch (op[0].unicode()) {
@@ -284,48 +239,11 @@ bool Parser::isRightAssociative(const QString &op)
 bool Parser::isFunction(const QString &str)
 {
     static const QStringList functions = {
-        "sin", "cos", "tan", "ln", "log", "sqrt"
+        "sin", "cos", "tan", "ln", "log", "sqrt", "abs", "arcsin", "arccos", "arctan"
     };
     return functions.contains(str);
 }
 
-double Parser::applyOperator(const QString &op, const double left, const double right)
-{
-    switch (op[0].unicode()) {
-    case '+': return left + right;
-    case '-': return left - right;
-    case '*': return left * right;
-    case '/':
-        if (qFuzzyIsNull(right)) throw std::runtime_error("Деление на ноль");
-        return left / right;
-    case '%':
-        if (qFuzzyIsNull(right)) throw std::runtime_error("Деление на ноль в операции остатка");
-        return fmod(left, right);
-    case '^': return qPow(left, right);
-    default: throw std::invalid_argument("Неизвестный оператор: " + op.toStdString());
-    }
-}
-
-double Parser::applyFunction(const QString &func, const double arg)
-{
-    if (func == "sin") return qSin(qDegreesToRadians(arg));
-    if (func == "cos") return qCos(qDegreesToRadians(arg));
-    if (func == "tan") return qTan(qDegreesToRadians(arg));
-    if (func == "ln") { if (arg <= 0) throw std::runtime_error("ln(x≤0)"); return qLn(arg); }
-    if (func == "log") { if (arg <= 0) throw std::runtime_error("log(x≤0)"); return log10(arg); }
-    if (func == "sqrt") { if (arg < 0) throw std::runtime_error("√(x<0)"); return qSqrt(arg); }
-
-    throw std::invalid_argument("Неизвестная функция: " + func.toStdString());
-}
-
-double Parser::factorial(const double n)
-{
-    if (n < 0 || n != qFloor(n))
-        throw std::runtime_error("Факториал определён только для неотрицательных целых чисел");
-
-    if (n == 0 || n == 1) return 1;
-
-    double res = 1;
-    for (int i = 2; i <= n; ++i) res *= i;
-    return res;
-}
+bool Parser::s_degrees = false;
+void Parser::setAngleMode(const bool degrees) { s_degrees = degrees; }
+bool Parser::isDegrees() { return s_degrees; }

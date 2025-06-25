@@ -43,16 +43,12 @@ Item {
             function isOp(ch) {
                 return "+×÷*/^%".indexOf(ch) !== -1;
             }
-
             let out = "", prev = "";
-
             for (let i = 0; i < str.length; ++i) {
                 const ch = str[i];
-
-                const unaryMinus   = (ch === '-' && (prev === "" || prev === '(' || isOp(prev) || prev === '-'));
-                const afterExpSign = ((ch === '+' || ch === '-') && (prev === 'e' || prev === 'E'));
-                const isCaret      = (ch === '^');
-
+                const unaryMinus = (ch === '-' && (prev === "" || prev === '(' || isOp(prev) || prev === '-'));
+                const afterExpSign = (ch === '+' || ch === '-') && (prev === 'e') && (i >= 2 && str[i-2] >= '0' && str[i-2] <= '9');
+                const isCaret = (ch === '^');
                 if (isOp(ch) || ch === '-') {
                     if (afterExpSign || unaryMinus || isCaret) {
                         out += ch;
@@ -62,10 +58,8 @@ Item {
                 } else {
                     out += ch;
                 }
-
                 if (ch !== ' ') prev = ch;
             }
-
             return out.replace(/\s+/g, ' ').trim();
         }
 
@@ -82,12 +76,12 @@ Item {
                 spacing: 4
 
                 Label {
-                    text: listView.pretty(expression)
+                    text: qsTr(listView.pretty(expression))
                     color: "#ffffff"; font.pixelSize: 24
                     elide: Label.ElideLeft
                 }
                 Label {
-                    text: result
+                    text: qsTr(result)
                     color: "#cfcfcf"; font.pixelSize: 20
                     elide: Label.ElideLeft
                 }
