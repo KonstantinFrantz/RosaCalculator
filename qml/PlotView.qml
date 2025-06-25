@@ -47,7 +47,14 @@ Item {
             Button {
                 text: qsTr("←")
                 background: Rectangle { color: "transparent" }
-                contentItem: Text { text: parent.text; color: "#ffffff"; font.pixelSize: 16 }
+                contentItem: Text {
+                    text: parent.text
+                    color: "#ffffff"
+                    font.pixelSize: 20
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+
                 onClicked: root.backClicked()
             }
 

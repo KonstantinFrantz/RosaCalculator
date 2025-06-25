@@ -7,30 +7,58 @@ Item {
     id: root
 
     property bool showFunctions: false
-    signal menuClicked()
+    signal historyClicked()
+    signal converterClicked()
 
     Button {
-        id: menuButton
+        id: converterButton
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.margins: 15
+        width: 40;  height: 40
+        background: Rectangle {
+            color: "transparent"
+            radius: 20
+        }
+
+        contentItem: Text {
+            anchors.fill: parent
+            text: qsTr("₽")
+            color: "#888888"
+            font.pixelSize: 24
+            font.weight: Font.Medium
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+
+        onClicked: root.converterClicked()
+    }
+
+    Button {
+        id: historyButton
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.margins: 15
         width: 40;  height: 40
-        background: Rectangle { color: "transparent" }
+        background: Rectangle {
+            color: "transparent"
+            radius: 20
+        }
 
         contentItem: Text {
             anchors.fill: parent
-            text: qsTr("⋮")
+            text: qsTr("⟳")
             color: "#888888"
             font.pixelSize: 24
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
         }
 
-        onClicked: root.menuClicked()
+        onClicked: root.historyClicked()
     }
 
     ColumnLayout {
-        anchors.top: menuButton.bottom
+        anchors.top: historyButton.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right

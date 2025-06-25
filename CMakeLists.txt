@@ -21,6 +21,8 @@ qt_add_qml_module(appCalculator
         qml/CalcButton.qml
         qml/DisplayPanel.qml
         qml/PlotView.qml
+        qml/ConverterView.qml
+        qml/CurrencySelector.qml
     SOURCES
         parser.cpp parser.h
         calculator.cpp calculator.h
@@ -31,6 +33,9 @@ qt_add_qml_module(appCalculator
         arifmeticevaluator.cpp arithmeticevaluator.h
         functionevaluator.cpp functionevaluator.h
         plotmodel.cpp plotmodel.h
+        database/currencydao.cpp database/currencydao.h
+        database/currencyentity.cpp database/calculationentity.h
+        currencymanager.cpp currencymanager.h
 )
 
 

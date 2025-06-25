@@ -74,12 +74,31 @@ bool DatabaseManager::createTables() const {
         )
     )";
 
-    const QString createIndexQuery = R"(
+    const QString createCalculationsIndexQuery = R"(
         CREATE INDEX IF NOT EXISTS idx_calculations_timestamp
         ON calculations(timestamp DESC)
     )";
 
-    return executeQuery(createCalculationsTable) && executeQuery(createIndexQuery);
+    const QString createCurrencyTable = R"(
+        CREATE TABLE IF NOT EXISTS currency_rates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            code TEXT NOT NULL UNIQUE,
+            name TEXT NOT NULL,
+            nominal INTEGER NOT NULL,
+            rate REAL NOT NULL,
+            last_update DATETIME NOT NULL
+        )
+    )";
+
+    const QString createCurrencyIndexQuery = R"(
+        CREATE INDEX IF NOT EXISTS idx_currency_code
+        ON currency_rates(code)
+    )";
+
+    return executeQuery(createCalculationsTable) &&
+        executeQuery(createCalculationsIndexQuery) &&
+            executeQuery(createCurrencyTable) &&
+                executeQuery(createCurrencyIndexQuery);
 }
 
 bool DatabaseManager::executeQuery(const QString &query) const {
