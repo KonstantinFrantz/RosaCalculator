@@ -9,26 +9,56 @@ Item {
 
     RowLayout {
         id: header
-        anchors { top: parent.top; left: parent.left; right: parent.right; margins: 8 }
+        anchors { top: parent.top; left: parent.left; right: parent.right; }
+        anchors.leftMargin: 20
+        anchors.rightMargin: 20
+        anchors.topMargin: 10
 
         Button {
-            text: "←"
-            background: Rectangle { color: "transparent" }
-            contentItem: Text { text: parent.text; color: "#ffffff"; font.pixelSize: 16 }
+            width: 40;  height: 40
+            background: Rectangle {
+                color: "transparent"
+                radius: 20
+            }
+
+            contentItem: Text {
+                anchors.fill: parent
+                text: qsTr("←");
+                color: "#888888"
+                font.pixelSize: 24
+                font.weight: Font.Medium
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+
             onClicked: root.backClicked()
         }
-        Label {
-            text: qsTr("История")
-            font.bold: true; color: "white"
+        Text {
+            text: qsTr("История");
+            color: "#ffffff"
+            font.pixelSize: 24
+            font.weight: Font.Medium
             horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
             Layout.fillWidth: true
         }
         Button {
-            text: qsTr("Очистить"); padding: 6
-            background: Rectangle { color: "#b55353"; radius: 4 }
-            contentItem: Text { text: parent.text; color: "#ffffff"; font.pixelSize: 14
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter }
+            width: 40;  height: 40
+            background: Rectangle {
+                color: "transparent"
+                radius: 20
+            }
+
+            contentItem: Text {
+                anchors.fill: parent
+                text: qsTr("🗑");
+                color: "#888888"
+                font.pixelSize: 24
+                font.weight: Font.Medium
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+
             onClicked: historyManager.clearHistory()
         }
     }
@@ -78,12 +108,12 @@ Item {
                 Label {
                     text: qsTr(listView.pretty(expression))
                     color: "#ffffff"; font.pixelSize: 24
-                    elide: Label.ElideLeft
+                    elide: Label.ElideRight
                 }
                 Label {
                     text: qsTr(result)
                     color: "#cfcfcf"; font.pixelSize: 20
-                    elide: Label.ElideLeft
+                    elide: Label.ElideRight
                 }
             }
 
@@ -91,6 +121,7 @@ Item {
                 id: delBtn
                 width: 40; height: parent.height
                 anchors.right: parent.right
+                anchors.rightMargin: 15
                 background: Rectangle { color: "transparent" }
                 contentItem: Text { text: "✕"; color: "#ff5c5c"; font.pixelSize: 20
                                     horizontalAlignment: Text.AlignHCenter

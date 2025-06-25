@@ -27,7 +27,8 @@ ApplicationWindow {
     Component {
         id: calculatorPage
         CalculatorView {
-            onMenuClicked: stack.push(historyPage)
+            onHistoryClicked: stack.push(historyPage)
+            onConverterClicked: stack.push(converterPage)
         }
     }
 
@@ -41,6 +42,13 @@ ApplicationWindow {
     Component {
         id: plotPage
         PlotView {
+            onBackClicked: stack.pop()
+        }
+    }
+
+    Component {
+        id: converterPage
+        ConverterView {
             onBackClicked: stack.pop()
         }
     }
