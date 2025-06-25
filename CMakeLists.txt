@@ -4,7 +4,7 @@ project(Calculator VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick Sql)
+find_package(Qt6 REQUIRED COMPONENTS Quick Sql Charts)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -20,6 +20,7 @@ qt_add_qml_module(appCalculator
         qml/HistoryView.qml
         qml/CalcButton.qml
         qml/DisplayPanel.qml
+        qml/PlotView.qml
     SOURCES
         parser.cpp parser.h
         calculator.cpp calculator.h
@@ -27,6 +28,9 @@ qt_add_qml_module(appCalculator
         database/calculationentity.cpp database/calculationentity.h
         database/calculationdao.cpp database/calculationdao.h
         historymanager.cpp historymanager.h
+        arifmeticevaluator.cpp arithmeticevaluator.h
+        functionevaluator.cpp functionevaluator.h
+        plotmodel.cpp plotmodel.h
 )
 
 
@@ -50,6 +54,7 @@ set_target_properties(appCalculator PROPERTIES
 target_link_libraries(appCalculator
     PRIVATE Qt6::Quick
     PRIVATE Qt6::Sql
+    PRIVATE Qt6::Charts
 )
 
 include(GNUInstallDirs)

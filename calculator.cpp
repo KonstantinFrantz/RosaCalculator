@@ -1,5 +1,7 @@
 #include "calculator.h"
 #include "parser.h"
+#include "arithmeticevaluator.h"
+#include "functionevaluator.h"
 
 #include <QRegularExpression>
 #include <QDebug>
@@ -13,6 +15,7 @@ QString Calculator::previewResult() const { return m_previewResult; }
 bool Calculator::hasError() const { return m_hasError; }
 bool Calculator::angleDegrees() const { return m_angleDegrees; }
 QString Calculator::errorMessage() const { return m_errorMessage; }
+bool Calculator::hasVariable() const { return m_hasVariable; }
 
 void Calculator::setCurrentNumber(const QString &d) {
     if (m_currentNumber != d) {
@@ -22,7 +25,9 @@ void Calculator::setCurrentNumber(const QString &d) {
 
 void Calculator::setExpression(const QString &e) {
     if (m_expression != e) {
-        m_expression = e; emit expressionChanged();
+        m_expression = e;
+        emit expressionChanged();
+        checkForVariable();
     }
 }
 
@@ -32,6 +37,15 @@ void Calculator::clearError()
         m_hasError = false;
         m_errorMessage.clear();
         emit errorChanged();
+    }
+}
+
+void Calculator::checkForVariable()
+{
+    const bool hadVariable = m_hasVariable;
+    m_hasVariable = FunctionEvaluator::containsVariable(m_expression);
+    if (hadVariable != m_hasVariable) {
+        emit hasVariableChanged();
     }
 }
 
@@ -89,6 +103,19 @@ void Calculator::appendDot()
     }
 }
 
+void Calculator::appendVariable()
+{
+    clearError();
+    if (m_lastWasResult) {
+        clear();
+        m_lastWasResult = false;
+    }
+
+    m_currentNumber.clear();
+    setExpression(m_expression + "x");
+    evaluatePreview();
+}
+
 void Calculator::deleteLast()
 {
     clearError();
@@ -143,8 +170,15 @@ void Calculator::evaluatePreview()
         return;
     }
 
+    if (m_hasVariable) {
+        if (!m_previewResult.isEmpty()) {
+            m_previewResult = ""; emit previewResultChanged();
+        }
+        return;
+    }
+
     bool ok = false;
-    const double res = Parser::evaluate(prep,&ok);
+    const double res = ArithmeticEvaluator::evaluate(prep, &ok);
     if (const QString s = formatResult(res); ok && s != "nan") {
         if (s != m_previewResult) {
             m_previewResult = s; emit previewResultChanged();
@@ -158,17 +192,27 @@ void Calculator::evaluateResult()
 {
     clearError();
     const QString prep=prepareExpression(m_expression);
+
+    if (m_hasVariable) {
+        m_hasError = true;
+        m_errorMessage = "Выражение является функцией";
+        emit errorChanged();
+        return;
+    }
+
     bool ok = false;
-    const double res = Parser::evaluate(prep,&ok);
+    const double res = ArithmeticEvaluator::evaluate(prep, &ok);
 
     if (const QString s = formatResult(res); ok && s != "nan" && s != "inf") {
         setCurrentNumber(s); setExpression(s); m_lastWasResult = true;
         if (!m_previewResult.isEmpty()) {
             m_previewResult = ""; emit previewResultChanged();
         }
-        emit calculationPerformed(prep,s);
+        emit calculationPerformed(prep, s);
     } else {
-        m_hasError = true; m_errorMessage = "Недопустимое выражение"; emit errorChanged();
+        m_hasError = true;
+        m_errorMessage = "Недопустимое выражение";
+        emit errorChanged();
     }
 }
 
@@ -195,7 +239,8 @@ void Calculator::appendFunction(const QString &func)
     }
     setExpression(m_expression + func + '(');
     ++m_openParensCount;
-    setCurrentNumber(""); evaluatePreview();
+    setCurrentNumber("");
+    evaluatePreview();
 }
 
 void Calculator::appendConstant(const QString &symbol)
@@ -211,7 +256,6 @@ void Calculator::appendConstant(const QString &symbol)
     evaluatePreview();
 }
 
-
 void Calculator::addParenthesis()
 {
     clearError();
@@ -220,6 +264,7 @@ void Calculator::addParenthesis()
                            m_expression.back()==')' ||
                            m_expression.back() == '!' ||
                            m_expression.back()=='e' ||
+                           m_expression.back()=='x' ||
                            m_expression.back().unicode() == 0x03C0); // π
     if (close) {
         setExpression(m_expression+')'); --m_openParensCount;
@@ -253,7 +298,8 @@ void Calculator::percentage()
         setExpression(m_expression.left(m_expression.length() - m_currentNumber.length()) + s);
     else
         setExpression(m_expression+s);
-    setCurrentNumber(s); evaluatePreview();
+    setCurrentNumber(s);
+    evaluatePreview();
 }
 
 void Calculator::loadExpression(const QString &expr)
@@ -271,4 +317,16 @@ void Calculator::toggleAngleMode()
     Parser::setAngleMode(m_angleDegrees);
     emit angleModeChanged();
     evaluatePreview();
+}
+
+void Calculator::requestPlot()
+{
+    if (m_hasVariable && !m_expression.isEmpty()) {
+        const QString prep = prepareExpression(m_expression);
+        if (!m_previewResult.isEmpty()) {
+            m_previewResult = ""; emit previewResultChanged();
+        }
+        emit plotRequested(prep);
+        emit calculationPerformed(prep, "Функция");
+    }
 }

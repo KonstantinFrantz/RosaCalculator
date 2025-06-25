@@ -23,7 +23,7 @@ Button {
     }
 
     contentItem: Text {
-        text: root.text
+        text: qsTr(root.text)
         font: root.font
         color: root.textColor
         horizontalAlignment: Text.AlignHCenter
