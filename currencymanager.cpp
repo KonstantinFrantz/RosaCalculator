@@ -5,7 +5,7 @@
 #include <QXmlStreamReader>
 #include <QDebug>
 
-const QString CurrencyManager::CBR_API_URL = "https://www.cbr-xml-daily.ru/daily.xml";
+const QString CurrencyManager::CBR_API_URL = "https://www.cbr-xml-daily.ru/daily_utf8.xml";
 
 CurrencyManager::CurrencyManager(QObject *parent)
     : QObject(parent)
